@@ -5,8 +5,24 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MyService extends Service {
-    String tag = MyService.class.getSimpleName();
+    private String tag = MyService.class.getSimpleName();
+    private Timer timer;
+    private int myCounter, maxCounter;
+
+    private class MyTask extends TimerTask{
+        @Override
+        public void run() {
+            myCounter++;
+            Log.d(tag, "-----*****MyService MyTask*****-----"+myCounter);
+            if(myCounter > maxCounter){
+                cancel();
+            }
+        }
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -19,6 +35,10 @@ public class MyService extends Service {
     public void onCreate() {
         Log.d(tag, "-----*****MyService onCreate*****-----");
         super.onCreate();
+        myCounter = 0;
+        maxCounter = 100;
+        timer = new Timer();
+        timer.schedule(new MyTask(), 100, 100);
     }
 
     @Override
@@ -31,5 +51,10 @@ public class MyService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d(tag, "-----*****MyService onDestroy*****-----");
+        if(timer!=null){
+            timer.cancel();
+            timer.purge();
+            timer = null;
+        }
     }
 }
